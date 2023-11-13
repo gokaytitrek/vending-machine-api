@@ -61,6 +61,7 @@ buyRouter.post("/", [authenticate, buyer], async (req: any, res: any) => {
     // update deposit
     realm.write(() => {
       product.amountAvailable -= amount;
+      user.deposit -= amount * product.cost;
     });
 
     res.status(200).send();
