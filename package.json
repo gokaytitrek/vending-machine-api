@@ -8,7 +8,8 @@
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "preserve": "npm run build",
-    "serve": "concurrently \"npx tsc -w\"  \"nodemon dist/index.js\""
+    "serve": "concurrently \"npx tsc -w\"  \"nodemon dist/index.js\"",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -30,8 +31,13 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/express-session": "^1.17.10",
+    "@types/jest": "^29.5.8",
     "@types/jsonwebtoken": "^9.0.5",
+    "@types/supertest": "^2.0.16",
     "@types/uuid": "^9.0.7",
-    "nodemon": "^2.0.19"
+    "jest": "^29.7.0",
+    "nodemon": "^2.0.19",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1"
   }
 }
