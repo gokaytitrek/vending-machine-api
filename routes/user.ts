@@ -24,18 +24,15 @@ userRouter.get("/", async (req, res) => {
 // userName, password, role(BUYER, SELLER)
 userRouter.post("/", async (req, res) => {
   try {
-    const realm = await Realm.open(realmConfig);
-
     const { userName, password, role } = req.body as User;
-
     if (!userName || !password || !role) {
-      return res.status(403).send({
-        message: "Parameters are not correct",
-      });
+      return res.status(403).send({ message: "Parameters are not correct" });
     }
-
+    const realm = await Realm.open(realmConfig);
     const users = realm.objects<UserInterface>("User");
-    const user = users.find((t) => t.userName.toLowerCase() === userName.toLowerCase());
+    const user = users.find(
+      (t) => t.userName.toLowerCase() === userName.toLowerCase()
+    );
     if (user) {
       return res.status(403).send({
         message: "Username is exist",
@@ -54,13 +51,15 @@ userRouter.post("/", async (req, res) => {
         role,
       } as User);
     });
+    realm.close();
 
     res.status(201).send({
       message: "User created",
     });
-    realm.close();
-  } catch {
-    res.status(500).send();
+  } catch (e) {
+    res.status(500).send({
+      message: e,
+    });
   }
 });
 
