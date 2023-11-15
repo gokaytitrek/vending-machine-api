@@ -32,7 +32,7 @@ npm run serve
 
 /user/login
 
-#### POST
+##### POST
 
 /user create user
 
@@ -45,6 +45,9 @@ npm run serve
 /buy
 
 /user/login
+
+##### DELETE
+/product
 
 ### web
 ```bash
