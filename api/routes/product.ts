@@ -57,8 +57,6 @@ productRouter.delete(
     try {
       // check product is created by seller user
       const realm = await Realm.open(realmConfig);
-      // const { productId } = req.body.source; //axios
-      console.log(req.body)
       const { productId } = req.body;
 
       if (!productId) {
@@ -156,7 +154,6 @@ productRouter.post("/", [authenticate, seller], async (req: any, res: any) => {
       message: "Product created",
     });
   } catch (e) {
-    console.log(e)
     res.status(500).send();
   }
 });
