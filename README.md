@@ -1,11 +1,11 @@
-# Vending machine api
+# Vending machine
 
 
 ## Getting Started
 
-First, install the dependencies:
+### api
 ```bash
-npm install
+cd api && npm install
 ```
 
 Please add .env file
@@ -21,8 +21,8 @@ Run the development server:
 npm run serve
 ```
 
-### Endpoints
-#### GET
+#### Endpoints
+##### GET
 
 /product
 
@@ -45,3 +45,14 @@ npm run serve
 /buy
 
 /user/login
+
+### web
+```bash
+cd web && npm install
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
