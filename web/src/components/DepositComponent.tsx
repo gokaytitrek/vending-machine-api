@@ -27,8 +27,26 @@ export default function DepositComponent() {
     }
   };
 
+  const handleReset = async () => {
+    try {
+      const { status, error } = await post("/user/reset", {});
+      if (status === 201) {
+        setDeposit(initialState);
+      } else {
+        setDeposit({ ...deposit, error });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
-    <ContainerComponent buttonText="Add" handleClick={handleDeposit}>
+    <ContainerComponent
+      buttonText="Add"
+      handleClick={handleDeposit}
+      secondaryButton="Reset"
+      handleSecondary={handleReset}
+    >
       <TextField
         required
         label="Deposit"

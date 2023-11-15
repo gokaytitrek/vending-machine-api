@@ -3,12 +3,16 @@ import { Button, Card, CardActions, CardContent } from "@mui/material";
 type ContainerComponentType = {
   buttonText: string;
   handleClick(): void;
+  secondaryButton?: string;
+  handleSecondary?: () => void;
 };
 
 export default function ContainerComponent({
   children,
   buttonText,
   handleClick,
+  secondaryButton,
+  handleSecondary,
 }: React.PropsWithChildren<ContainerComponentType>) {
   return (
     <Card
@@ -32,6 +36,11 @@ export default function ContainerComponent({
       <CardActions>
         <Button onClick={handleClick}>{buttonText}</Button>
       </CardActions>
+      {secondaryButton && (
+        <CardActions>
+          <Button onClick={handleSecondary}>{secondaryButton}</Button>
+        </CardActions>
+      )}
     </Card>
   );
 }
