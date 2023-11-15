@@ -2,7 +2,7 @@
 
 import { useProductData } from "@/providers/DataProvider";
 import { Product } from "@/types";
-import { post } from "@/utils/helper";
+import { deleteProduct, post } from "@/utils/helper";
 import {
   Card,
   CardContent,
@@ -48,8 +48,12 @@ export default function ProductComponent({ product }: { product: Product }) {
     }
   };
 
-  const handleDelete = () => {
-    // deleteProduct(product._id);
+  const handleDelete = async () => {
+    const { status, error } = await deleteProduct({ productId: product._id });
+    setError(error);
+    if (!error) {
+      refreshData();
+    }
   };
 
   return (

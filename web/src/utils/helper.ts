@@ -35,18 +35,18 @@ const post = async (url: string, payload = {}) => {
   }
 };
 
-const deleteProductX = async (payload = {}) => {
+const deleteProduct = async (payload = {}) => {
   const token = Cookies.get("token");
 
   try {
-    const response = await axios.delete('product', {
+    const response = await axios.delete("product", {
       headers: {
         authorization: `Bearer ${token}`,
       },
       data: {
-        source: payload
-      }
-    })
+        ...payload,
+      },
+    });
 
     return { status: response.status, data: response.data };
   } catch (e: Error | AxiosError | any) {
@@ -58,4 +58,4 @@ const deleteProductX = async (payload = {}) => {
   }
 };
 
-export { get, post, deleteProductX };
+export { get, post, deleteProduct };
