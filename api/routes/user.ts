@@ -35,7 +35,7 @@ userRouter.post("/", async (req, res) => {
     );
     if (user) {
       return res.status(403).send({
-        message: "Username is exist",
+        message: "Username exists",
       });
     }
 
@@ -83,23 +83,27 @@ userRouter.post("/login", async (req, res) => {
       const users = realm.objects<UserInterface>("User");
       const user = users.find((user) => user.userName === userName);
 
-      // @ts-ignore
-      const comparePassword = await bcrypt.compare(password, user?.password);
+      if (user) {
+        const comparePassword = await bcrypt.compare(password, user?.password);
+        if (comparePassword) {
+          const accessToken = jwt.sign(
+            {
+              _id: user._id,
+              userName: user.userName,
+              role: user.role,
+            },
+            process.env.ACCESS_TOKEN_SECRET as string
+          );
 
-      if (user && comparePassword) {
-        const accessToken = jwt.sign(
-          {
-            _id: user._id,
-            userName: user.userName,
-            role: user.role,
-          },
-          process.env.ACCESS_TOKEN_SECRET as string
-        );
-
-        res.status(201).send({
-          message: "User successfully logged in",
-          accessToken,
-        });
+          res.status(201).send({
+            message: "User successfully logged in",
+            accessToken,
+          });
+        } else {
+          res.status(404).send({
+            message: "Password is wrong",
+          });
+        }
       } else {
         res.status(404).send({
           message: "User not found",

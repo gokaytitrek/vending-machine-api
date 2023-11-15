@@ -57,6 +57,8 @@ productRouter.delete(
     try {
       // check product is created by seller user
       const realm = await Realm.open(realmConfig);
+      // const { productId } = req.body.source; //axios
+      console.log(req.body)
       const { productId } = req.body;
 
       if (!productId) {
@@ -127,6 +129,17 @@ productRouter.post("/", [authenticate, seller], async (req: any, res: any) => {
       return;
     }
 
+    const products = realm.objects<ProductInterface>("Product");
+
+    const product = products.find(
+      (t) => t.productName.toLowerCase() === productName.toLowerCase()
+    );
+    if (product) {
+      return res.status(403).send({
+        message: "Product exists",
+      });
+    }
+
     // create product
     realm.write(() => {
       realm.create(Product, {
@@ -142,7 +155,8 @@ productRouter.post("/", [authenticate, seller], async (req: any, res: any) => {
     res.status(201).send({
       message: "Product created",
     });
-  } catch {
+  } catch (e) {
+    console.log(e)
     res.status(500).send();
   }
 });

@@ -54,7 +54,7 @@ buyRouter.post("/", [authenticate, buyer], async (req: any, res: any) => {
 
     if (product.amountAvailable - amount < 0) {
       return res.status(403).send({
-        message: `there is not enough available product. There is only ${product.amountAvailable}`,
+        message: `there is not enough available product. Available: ${product.amountAvailable}`,
       });
     }
 
@@ -64,7 +64,7 @@ buyRouter.post("/", [authenticate, buyer], async (req: any, res: any) => {
       user.deposit -= amount * product.cost;
     });
 
-    res.status(200).send();
+    res.status(201).send();
   } catch {
     res.status(500).send();
   }
