@@ -1,8 +1,7 @@
 import express from "express";
-import { realmConfig } from "../models";
 import authenticate from "../middleware/authenticate";
-import { UserInterface } from "../models/user";
 import buyer from "../middleware/buyer";
+import { mongodbService } from "../services/MongodbService";
 let depositRouter = express.Router();
 
 // deposit money
@@ -28,22 +27,8 @@ depositRouter.post("/", [authenticate, buyer], async (req: any, res: any) => {
       });
     }
 
-    const realm = await Realm.open(realmConfig);
-    const users = realm.objects<UserInterface>("User");
+    await mongodbService.updateDeposit(_id, amount);
 
-    // find user
-    const user = users.find((user) => user._id === _id);
-
-    if (user) {
-      // update deposit
-      realm.write(() => {
-        user.deposit = user.deposit + amount;
-      });
-    } else {
-      return res.status(404).send({
-        message: "user is not found",
-      });
-    }
     res.status(201).send();
   } catch {
     res.status(500).send();

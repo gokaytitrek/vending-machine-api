@@ -1,22 +1,15 @@
 import express from "express";
-import { Product, realmConfig } from "../models";
-import { v4 as uuidv4 } from "uuid";
-import { UserInterface } from "../models/user";
-import { ProductInterface } from "../models/product";
 import authenticate from "../middleware/authenticate";
 import seller from "../middleware/seller";
+import { mongodbService } from "../services/MongodbService";
 let productRouter = express.Router();
 
 // /product
 productRouter.get("/", async (req, res) => {
   try {
-    // return all products
-    const realm = await Realm.open(realmConfig);
-    const products = realm.objects("Product");
+    const products = await mongodbService.getProducts();
 
     res.status(201).send(products);
-
-    realm.close();
   } catch {
     res.status(500).send();
   }
@@ -27,20 +20,16 @@ productRouter.get("/:id", async (req, res) => {
   try {
     // return specific product
     const productId = req.params.id;
-    const realm = await Realm.open(realmConfig);
 
-    const products = realm.objects("Product");
-    const product = products.filtered("_id == $0", productId);
+    const product = await mongodbService.getProduct(productId);
 
-    if (product.length === 1) {
+    if (product) {
       res.status(201).send(product);
     } else {
       res.status(404).send({
         message: "Not found",
       });
     }
-
-    realm.close();
   } catch {
     res.status(500).send();
   }
@@ -56,7 +45,6 @@ productRouter.delete(
   async (req: any, res: any) => {
     try {
       // check product is created by seller user
-      const realm = await Realm.open(realmConfig);
       const { productId } = req.body;
 
       if (!productId) {
@@ -68,21 +56,17 @@ productRouter.delete(
       // @ts-ignore
       const { _id, role } = req.user;
 
-      const products = realm.objects<ProductInterface>("Product");
-      const product = products.filtered("_id == $0", productId);
+      const product = await mongodbService.getProduct(productId);
 
-      if (product.length !== 1) {
+      if (!product) {
         return res.status(404).send({
           message: "Product not found",
         });
       }
 
-      if (product[0].seller && product[0].seller._id === _id) {
-        realm.write(() => {
-          realm.delete(product);
-        });
+      if (product.seller && product.seller._id === _id) {
+        await mongodbService.deleteProduct(productId);
 
-        realm.close();
         res.status(201).send({
           message: "product deleted",
         });
@@ -103,8 +87,6 @@ productRouter.delete(
 // amountAvailable, productName, cost
 productRouter.post("/", [authenticate, seller], async (req: any, res: any) => {
   try {
-    const realm = await Realm.open(realmConfig);
-
     const { amountAvailable, productName, cost } = req.body;
 
     if (!amountAvailable || !productName || !cost) {
@@ -114,20 +96,9 @@ productRouter.post("/", [authenticate, seller], async (req: any, res: any) => {
     }
 
     // @ts-ignore
-    const { _id, role } = req.user;
+    const { _id } = req.user;
 
-    // find user
-    const users = realm.objects<UserInterface>("User");
-    const user = users.filtered("_id == $0", _id);
-
-    if (user.length !== 1) {
-      res.status(404).send({
-        message: "User not found",
-      });
-      return;
-    }
-
-    const products = realm.objects<ProductInterface>("Product");
+    const products = await mongodbService.getProducts();
 
     const product = products.find(
       (t) => t.productName.toLowerCase() === productName.toLowerCase()
@@ -138,23 +109,15 @@ productRouter.post("/", [authenticate, seller], async (req: any, res: any) => {
       });
     }
 
-    // create product
-    realm.write(() => {
-      realm.create(Product, {
-        _id: uuidv4(),
-        amountAvailable,
-        productName,
-        cost,
-        seller: user[0] as UserInterface,
-      } as Product);
-    });
+    await mongodbService.createProduct(amountAvailable, productName, cost, _id);
 
-    realm.close();
     res.status(201).send({
       message: "Product created",
     });
   } catch (e) {
-    res.status(500).send();
+    res.status(500).send({
+      message: e,
+    });
   }
 });
 

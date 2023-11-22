@@ -1,21 +1,18 @@
 import express from "express";
-import { User, realmConfig } from "../models";
 import { v4 as uuidv4 } from "uuid";
 import { UserInterface } from "../models/user";
 import jwt from "jsonwebtoken";
 import authenticate from "../middleware/authenticate";
 import buyer from "../middleware/buyer";
 import bcrypt from "bcrypt";
+import { mongodbService } from "../services/MongodbService";
 
 let userRouter = express.Router();
 
 userRouter.get("/", async (req, res) => {
-  const realm = await Realm.open(realmConfig);
-  const users = realm.objects<UserInterface>("User");
+  const users = await mongodbService.getUsers();
 
   res.status(201).send(users);
-
-  realm.close();
 });
 
 // create user
@@ -24,12 +21,11 @@ userRouter.get("/", async (req, res) => {
 // userName, password, role(BUYER, SELLER)
 userRouter.post("/", async (req, res) => {
   try {
-    const { userName, password, role } = req.body as User;
+    const { userName, password, role } = req.body as UserInterface;
     if (!userName || !password || !role) {
       return res.status(403).send({ message: "Parameters are not correct" });
     }
-    const realm = await Realm.open(realmConfig);
-    const users = realm.objects<UserInterface>("User");
+    const users = await mongodbService.getUsers();
     const user = users.find(
       (t) => t.userName.toLowerCase() === userName.toLowerCase()
     );
@@ -42,16 +38,7 @@ userRouter.post("/", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    realm.write(() => {
-      realm.create(User, {
-        _id: uuidv4(),
-        userName,
-        password: hashedPassword,
-        deposit: 0,
-        role,
-      } as User);
-    });
-    realm.close();
+    await mongodbService.createUser(userName, hashedPassword, role);
 
     res.status(201).send({
       message: "User created",
@@ -69,8 +56,6 @@ userRouter.post("/", async (req, res) => {
 // userName, password
 userRouter.post("/login", async (req, res) => {
   try {
-    const realm = await Realm.open(realmConfig);
-
     const { userName, password } = req.body;
 
     if (!userName || !password) {
@@ -80,7 +65,7 @@ userRouter.post("/login", async (req, res) => {
     }
 
     if (userName && password) {
-      const users = realm.objects<UserInterface>("User");
+      const users = await mongodbService.getUsers();
       const user = users.find((user) => user.userName === userName);
 
       if (user) {
@@ -112,7 +97,6 @@ userRouter.post("/login", async (req, res) => {
     } else {
       res.status(404).send();
     }
-    realm.close();
   } catch {
     res.status(500).send();
   }
@@ -152,20 +136,7 @@ userRouter.post("/reset", [authenticate, buyer], async (req: any, res: any) => {
     // @ts-ignore
     const { _id } = req.user;
 
-    const realm = await Realm.open(realmConfig);
-    const users = realm.objects<UserInterface>("User");
-    const user = users.find((user) => user._id === _id);
-
-    if (user) {
-      // update deposit
-      realm.write(() => {
-        user.deposit = 0;
-      });
-    } else {
-      return res.status(404).send({
-        message: "User is not found",
-      });
-    }
+    await mongodbService.resetDeposit(_id);
     res.status(201).send();
   } catch {
     res.status(500).send();

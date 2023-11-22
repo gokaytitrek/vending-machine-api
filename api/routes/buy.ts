@@ -1,9 +1,7 @@
 import express from "express";
-import { realmConfig } from "../models";
 import authenticate from "../middleware/authenticate";
-import { UserInterface } from "../models/user";
-import { ProductInterface } from "../models/product";
 import buyer from "../middleware/buyer";
+import { mongodbService } from "../services/MongodbService";
 let buyRouter = express.Router();
 
 // deposit money
@@ -23,11 +21,7 @@ buyRouter.post("/", [authenticate, buyer], async (req: any, res: any) => {
       });
     }
 
-    const realm = await Realm.open(realmConfig);
-    const users = realm.objects<UserInterface>("User");
-
-    const products = realm.objects<ProductInterface>("Product");
-    const product = products.find((p) => p._id === productId);
+    const product = await mongodbService.getProduct(productId);
 
     if (!product) {
       return res.status(404).send({
@@ -35,10 +29,10 @@ buyRouter.post("/", [authenticate, buyer], async (req: any, res: any) => {
       });
     }
 
-    const user = users.find((user) => user._id === _id);
+    const user = await mongodbService.getUser(_id);
     if (!user) {
       return res.status(404).send({
-        message: "user is not found",
+        message: "user does not exist",
       });
     }
 
@@ -58,11 +52,9 @@ buyRouter.post("/", [authenticate, buyer], async (req: any, res: any) => {
       });
     }
 
-    // update deposit
-    realm.write(() => {
-      product.amountAvailable -= amount;
-      user.deposit -= amount * product.cost;
-    });
+    const cost = amount * product.cost;
+    await mongodbService.updateDeposit(_id, cost * -1);
+    await mongodbService.updateAvailableAmount(productId, amount * -1);
 
     res.status(201).send();
   } catch {

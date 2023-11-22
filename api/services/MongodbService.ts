@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 interface DBInterface {
   getProducts(): Promise<ProductInterface[]>;
-  getProductById(productId: string): Promise<ProductInterface | null>;
+  getProduct(productId: string): Promise<ProductInterface | null>;
   createProduct(
     amountAvailable: string,
     productName: string,
@@ -37,7 +37,7 @@ class MongodbService implements DBInterface {
     return Product.find({ deleted: false });
   }
 
-  getProductById(productId: string): Promise<ProductInterface | null> {
+  getProduct(productId: string): Promise<ProductInterface | null> {
     return Product.findById<ProductInterface>(productId).populate("seller");
   }
 
