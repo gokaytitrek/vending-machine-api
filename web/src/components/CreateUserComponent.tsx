@@ -4,8 +4,8 @@ import { TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import RadioComponent from "@/components/RadioComponent";
 import ContainerComponent from "@/components/ContainerComponent";
-import { post } from "@/utils/helper";
 import { Role } from "@/types";
+import { useAuth } from "@/providers/AuthProvider";
 
 const ROLE = [
   {
@@ -27,15 +27,13 @@ const initialState = {
 
 export default function CreateUserComponent() {
   const [user, setUser] = useState(initialState);
+  const { signUp } = useAuth();
 
   const handleCreateUser = async () => {
     try {
-      const { status, error } = await post("/user", {
-        userName: user.name,
-        password: user.password,
-        role: user.role,
-      });
-      if (status === 201) {
+      const error = await signUp(user.name, user.password, user.role);
+
+      if (!error) {
         setUser(initialState);
       } else {
         setUser({ ...user, error });
@@ -46,7 +44,7 @@ export default function CreateUserComponent() {
   };
 
   return (
-    <ContainerComponent buttonText="Create user" handleClick={handleCreateUser}>
+    <ContainerComponent buttonText="Next" handleClick={handleCreateUser}>
       <TextField
         required
         label="User name"

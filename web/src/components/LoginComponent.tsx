@@ -1,8 +1,7 @@
 import { TextField, Typography } from "@mui/material";
 import ContainerComponent from "./ContainerComponent";
-import { useEffect, useState } from "react";
-import { post } from "@/utils/helper";
-import Cookies from "js-cookie";
+import { useState } from "react";
+import { useAuth } from "@/providers/AuthProvider";
 
 const initialState = {
   name: "",
@@ -11,45 +10,21 @@ const initialState = {
 };
 
 export default function LoginComponent() {
+  const { signIn } = useAuth();
   const [user, setUser] = useState(initialState);
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    if (Cookies.get("token")) {
-      setLoggedIn(true);
-    }
-  }, []);
 
   const handleLogin = async () => {
-    const { status, error, data } = await post("/user/login", {
-      userName: user.name,
-      password: user.password,
-    });
+    const error = await signIn(user.name, user.password);
 
-    if (status === 201) {
-      Cookies.set("token", data.accessToken);
-
+    if (!error) {
       setUser(initialState);
-
-      setLoggedIn(true);
     } else {
       setUser({ ...user, error });
     }
   };
 
-  if (loggedIn) {
-    return (
-      <ContainerComponent
-        buttonText="Logout"
-        handleClick={() => {
-          setLoggedIn(false);
-          Cookies.remove("token");
-        }}
-      />
-    );
-  }
   return (
-    <ContainerComponent buttonText="Login" handleClick={handleLogin}>
+    <ContainerComponent buttonText="Next" handleClick={handleLogin} >
       <TextField
         required
         label="User name"
