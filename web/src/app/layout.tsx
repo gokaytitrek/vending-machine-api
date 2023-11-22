@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthProvider } from "@/providers/AuthProvider";
 import { DataProvider } from "@/providers/DataProvider";
 
 export default function RootLayout({
@@ -10,7 +11,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <DataProvider>{children}</DataProvider>
+        <AuthProvider>
+          <DataProvider>{children}</DataProvider>
+        </AuthProvider>
       </body>
     </html>
   );
