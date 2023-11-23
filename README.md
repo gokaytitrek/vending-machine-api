@@ -21,6 +21,12 @@ Run the development server:
 npm run serve
 ```
 
+Run tests:
+
+```bash
+npm run test
+```
+
 #### Endpoints
 ##### GET
 
