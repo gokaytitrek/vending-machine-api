@@ -10,8 +10,11 @@ import {
   CardActions,
   Button,
   Box,
+  Grid,
+  CardHeader,
 } from "@mui/material";
 import { useState } from "react";
+import SnackbarComponent from "./SnackBarComponent";
 
 export default function ProductComponent({ product }: { product: Product }) {
   const [amount, setAmount] = useState(1);
@@ -57,69 +60,65 @@ export default function ProductComponent({ product }: { product: Product }) {
   };
 
   return (
-    <Card
-      sx={{
-        width: 200,
-        maxHeight: 350,
-        backgroundColor: "lightgrey",
-        margin: "10px",
-      }}
-    >
-      <CardContent>
-        <Typography gutterBottom variant="h6" component="div">
-          {product.productName}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-        >{`Available: ${product.amountAvailable}`}</Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-        >{`Cost: ${product.cost}`}</Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
+    <Grid item key={product._id} xs={12} sm={6} md={4}>
+      <Card>
+        <CardHeader
+          title={product.productName}
+          titleTypographyProps={{ align: "center" }}
+          subheaderTypographyProps={{
+            align: "center",
           }}
-        >
-          <Button
-            size="small"
-            color="primary"
-            onClick={() => handleChange("decrease")}
-          >
-            -
-          </Button>
-          <Typography variant="body2" color="text.secondary">
-            {amount}
-          </Typography>
-          <Button
-            size="small"
-            color="primary"
-            onClick={() => handleChange("increase")}
-          >
-            +
-          </Button>
-        </Box>
-      </CardContent>
-
-      {error && (
+          sx={{
+            backgroundColor: (theme) =>
+              theme.palette.mode === "light"
+                ? theme.palette.grey[200]
+                : theme.palette.grey[700],
+          }}
+        />
         <CardContent>
-          <Typography variant="body2" color="error">
-            {error}
+          <Typography variant="subtitle1" align="center">
+            Cost:{product.cost}
           </Typography>
+          <Typography variant="subtitle1" align="center">
+            Avaialble:{product.amountAvailable}
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              size="small"
+              color="primary"
+              onClick={() => handleChange("decrease")}
+            >
+              -
+            </Button>
+            <Typography variant="body2" color="text.secondary">
+              {amount}
+            </Typography>
+            <Button
+              size="small"
+              color="primary"
+              onClick={() => handleChange("increase")}
+            >
+              +
+            </Button>
+          </Box>
         </CardContent>
-      )}
-      <CardActions>
-        <Button size="small" color="primary" onClick={handleBuy}>
-          Buy
-        </Button>
-        <Button size="small" color="secondary" onClick={handleDelete}>
-          Delete
-        </Button>
-      </CardActions>
-    </Card>
+        <CardActions>
+          <Button fullWidth variant={"contained"} onClick={handleBuy}>
+            {"Buy"}
+          </Button>
+          <Button fullWidth variant={"outlined"} onClick={handleDelete}>
+            {"Delete"}
+          </Button>
+        </CardActions>
+      </Card>
+      <SnackbarComponent error={error} />
+    </Grid>
   );
 }

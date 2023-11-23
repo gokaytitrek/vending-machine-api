@@ -33,6 +33,9 @@ const AuthProvider = ({ children }: React.PropsWithChildren<{}>) => {
 
     if (status === 201) {
       Cookies.set("token", data.accessToken);
+      Cookies.set("userName", data.userName);
+      Cookies.set("role", data.role);
+      
       setLoggedIn(true);
     } else {
       setLoggedIn(false);
@@ -43,6 +46,8 @@ const AuthProvider = ({ children }: React.PropsWithChildren<{}>) => {
 
   function signOut() {
     Cookies.remove("token");
+    Cookies.remove("userName");
+    Cookies.remove("role");
     setLoggedIn(false);
   }
 

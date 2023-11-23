@@ -1,9 +1,15 @@
 "use client";
 
-import { TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  TextField,
+} from "@mui/material";
 import { useState } from "react";
-import ContainerComponent from "@/components/ContainerComponent";
 import { post } from "@/utils/helper";
+import SnackbarComponent from "./SnackBarComponent";
 
 const initialState = {
   amount: "",
@@ -41,26 +47,34 @@ export default function DepositComponent() {
   };
 
   return (
-    <ContainerComponent
-      buttonText="Add"
-      handleClick={handleDeposit}
-      secondaryButton="Reset"
-      handleSecondary={handleReset}
-    >
-      <TextField
-        required
-        label="Deposit"
-        variant="standard"
-        className="bg-gray-700"
-        type="number"
-        value={deposit.amount}
-        onChange={(e) => setDeposit({ ...deposit, amount: e.target.value })}
-      />
-      {deposit.error && (
-        <Typography variant="body2" color="error">
-          {deposit.error}
-        </Typography>
-      )}
-    </ContainerComponent>
+    <>
+      <Card
+        sx={{
+          border: 1,
+          borderColor: (theme) => theme.palette.grey[200],
+        }}
+      >
+        <CardContent>
+          <TextField
+            required
+            label="Deposit"
+            variant="standard"
+            className="bg-gray-700"
+            type="number"
+            value={deposit.amount}
+            onChange={(e) => setDeposit({ ...deposit, amount: e.target.value })}
+          />
+        </CardContent>
+        <CardActions>
+          <Button fullWidth variant={"contained"} onClick={handleDeposit}>
+            {"Add"}
+          </Button>
+          <Button fullWidth variant={"outlined"} onClick={handleReset}>
+            {"Reset"}
+          </Button>
+        </CardActions>
+      </Card>
+      <SnackbarComponent error={deposit.error} />
+    </>
   );
 }

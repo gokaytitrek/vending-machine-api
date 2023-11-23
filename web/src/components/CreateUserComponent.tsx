@@ -1,85 +1,114 @@
-"use client";
-
-import { TextField, Typography } from "@mui/material";
-import { useState } from "react";
-import RadioComponent from "@/components/RadioComponent";
-import ContainerComponent from "@/components/ContainerComponent";
-import { Role } from "@/types";
+import * as React from "react";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
 import { useAuth } from "@/providers/AuthProvider";
+import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { useState } from "react";
+import { Role } from "@/types";
+import SnackbarComponent from "./SnackBarComponent";
 
-const ROLE = [
-  {
-    value: Role.Buyer,
-    label: "Buyer",
-  },
-  {
-    value: Role.Seller,
-    label: "Seller",
-  },
-];
-
-const initialState = {
-  name: "",
-  password: "",
-  role: Role.Buyer,
-  error: "",
-};
-
-export default function CreateUserComponent() {
-  const [user, setUser] = useState(initialState);
+export default function CreateProductComponent() {
   const { signUp } = useAuth();
+  const [error, setError] = useState("");
 
-  const handleCreateUser = async () => {
-    try {
-      const error = await signUp(user.name, user.password, user.role);
+  const handleSubmit = async (event: any) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
 
-      if (!error) {
-        setUser(initialState);
-      } else {
-        setUser({ ...user, error });
+    const userName = data.get("userName")?.toString();
+    const password = data.get("password")?.toString();
+    const role = data.get("role")?.toString();
+
+    if (userName && password && role) {
+      const error = await signUp(userName, password, role as Role);
+
+      if (error) {
+        setError(error);
       }
-    } catch (e) {
-      console.error(e);
     }
+    event.target.reset();
   };
 
   return (
-    <ContainerComponent buttonText="Next" handleClick={handleCreateUser}>
-      <TextField
-        required
-        label="User name"
-        variant="standard"
-        className="bg-gray-700"
-        inputProps={{ maxLength: 20 }}
-        value={user.name}
-        onChange={(e) => setUser({ ...user, name: e.target.value })}
-      />
-      <TextField
-        required
-        label="Password"
-        variant="standard"
-        type="password"
-        inputProps={{ maxLength: 20 }}
-        className="bg-gray-700"
-        value={user.password}
-        onChange={(e) => setUser({ ...user, password: e.target.value })}
-      />
-      <RadioComponent
-        title=""
-        value={user.role}
-        options={ROLE}
-        handleChange={(event) => {
-          setUser({
-            ...user,
-            role: (event.target as HTMLInputElement).value as Role,
-          });
-        }}
-      />
-      {user.error && (
-        <Typography variant="body2" color="error">
-          {user.error}
-        </Typography>
-      )}
-    </ContainerComponent>
+    <>
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography component="h1" variant="h5">
+            Create account
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
+            sx={{ mt: 1 }}
+          >
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="userName"
+              label="Username"
+              name="userName"
+              autoFocus
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+            />
+            <RadioGroup
+              aria-labelledby="demo-radio-buttons-group-label"
+              defaultValue="BUYER"
+              name="role"
+            >
+              <FormControlLabel
+                value={Role.Buyer}
+                control={<Radio />}
+                label="Buyer"
+              />
+              <FormControlLabel
+                value={Role.Seller}
+                control={<Radio />}
+                label="Seller"
+              />
+            </RadioGroup>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Create
+            </Button>
+
+            <Grid container>
+              <Grid item>
+                <Link href="#signIn" variant="body2">
+                  {"Do you have an account? Sign in"}
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+      </Container>
+      <SnackbarComponent error={error} />
+    </>
   );
 }
