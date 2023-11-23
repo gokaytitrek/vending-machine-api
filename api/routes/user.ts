@@ -1,5 +1,4 @@
 import express from "express";
-import { v4 as uuidv4 } from "uuid";
 import { UserInterface } from "../models/user";
 import jwt from "jsonwebtoken";
 import authenticate from "../middleware/authenticate";
@@ -83,6 +82,8 @@ userRouter.post("/login", async (req, res) => {
           res.status(201).send({
             message: "User successfully logged in",
             accessToken,
+            userName,
+            role: user.role,
           });
         } else {
           res.status(404).send({
